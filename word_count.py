@@ -47,7 +47,7 @@ def mapper(sequence):
     for _, text in sequence:
         words = text.split()
         for word in words:
-            word = word.replace(",", "").replace(".", "")
+            word = word.replace(",", "").replace(".", "").lower()
             new_sequence.append((word,1))
     return new_sequence
 
@@ -106,7 +106,7 @@ def create_ouptput_directory(output_directory):
 def save_output(output_directory, sequence):
     output_file_path = os.path.join(output_directory, 'part-00000.txt')
     
-    with open(output_file_path, 'w', encoding='utf-8') as output_file:
+    with open(output_file_path, 'w') as output_file:
         for key, value in sequence:
             line = f"{key}\t{value}\n"
             output_file.write(line)
@@ -121,7 +121,7 @@ def save_output(output_directory, sequence):
 
 def create_marker(output_directory):
     marker_file_path = os.path.join(output_directory, '_SUCCESS')
-    with open(marker_file_path, 'w', encoding='utf-8'):
+    with open(marker_file_path, 'w'):
         pass 
     print(f"Marker creado en: {marker_file_path}")
 
