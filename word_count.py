@@ -13,9 +13,21 @@
 #     ('text2.txt'. 'hypotheses.')
 #   ]
 #
-def load_input(input_directory):
-    pass
 
+import glob
+import fileinput
+import os
+
+
+def load_input(input_directory):
+    
+    sequence = []
+    filenames = glob.glob(input_directory + "/*")
+    with fileinput.input(files=filenames) as f:
+        for line in f:
+            sequence.append((fileinput.filename(), line))
+    
+    return sequence
 
 #
 # Escriba una función llamada maper que recibe una lista de tuplas de la
@@ -29,8 +41,15 @@ def load_input(input_directory):
 #     ...
 #   ]
 #
+
 def mapper(sequence):
-    pass
+    new_sequence = []
+    for _, text in sequence:
+        words = text.split()
+        for word in words:
+            word = word.replace(",", "").replace(".", "")
+            new_sequence.append((word,1))
+    return new_sequence
 
 
 #
@@ -45,8 +64,9 @@ def mapper(sequence):
 #   ]
 #
 def shuffle_and_sort(sequence):
-    pass
-
+    sorted_sequence = sorted(sequence, key=lambda x: x[0])
+    
+    return sorted_sequence
 
 #
 # Escriba la función reducer, la cual recibe el resultado de shuffle_and_sort y
@@ -54,8 +74,12 @@ def shuffle_and_sort(sequence):
 # ejemplo, la reducción indica cuantas veces aparece la palabra analytics en el
 # texto.
 #
-def reducer(sequence):
-    pass
+def reducer(sequence):    
+    reduced_result = {}
+    for key, value in sequence:
+        reduced_result[key] = reduced_result.get(key, 0) + value
+    reducer = list(reduced_result.items())
+    return reducer
 
 
 #
@@ -63,8 +87,12 @@ def reducer(sequence):
 # y lo crea. Si el directorio existe, la función falla.
 #
 def create_ouptput_directory(output_directory):
-    pass
-
+    if os.path.exists(output_directory):
+        raise FileExistsError(f"Error: El directorio '{output_directory}' ya existe.")
+    else:
+        os.makedirs(output_directory)
+        mensaje = f"Directorio '{output_directory}' creado correctamente."
+    return mensaje
 
 #
 # Escriba la función save_output, la cual almacena en un archivo de texto llamado
@@ -74,23 +102,41 @@ def create_ouptput_directory(output_directory):
 # elemento es la clave y el segundo el valor. Los elementos de la tupla están
 # separados por un tabulador.
 #
-def save_output(output_directory, sequence):
-    pass
 
+def save_output(output_directory, sequence):
+    output_file_path = os.path.join(output_directory, 'part-00000.txt')
+    
+    with open(output_file_path, 'w', encoding='utf-8') as output_file:
+        for key, value in sequence:
+            line = f"{key}\t{value}\n"
+            output_file.write(line)
+    
+    mensaje = f"Resultado guardado en: {output_file_path}"
+    return mensaje
 
 #
 # La siguiente función crea un archivo llamado _SUCCESS en el directorio
 # entregado como parámetro.
 #
+
 def create_marker(output_directory):
-    pass
+    marker_file_path = os.path.join(output_directory, '_SUCCESS')
+    with open(marker_file_path, 'w', encoding='utf-8'):
+        pass 
+    print(f"Marker creado en: {marker_file_path}")
 
 
 #
 # Escriba la función job, la cual orquesta las funciones anteriores.
 #
 def job(input_directory, output_directory):
-    pass
+    sequence = load_input(input_directory)
+    sequence = mapper(sequence)
+    sequence = shuffle_and_sort(sequence)
+    reduced_result = reducer(sequence)
+    create_ouptput_directory(output_directory)
+    save_output(output_directory, reduced_result)
+    create_marker(output_directory)
 
 
 if __name__ == "__main__":
